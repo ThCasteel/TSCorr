@@ -1,8 +1,7 @@
-"""
-Velocity and rate estimation from displacement time series.
+"""Velocity estimation utilities.
 
-This module implements time-series fitting algorithms for estimating
-ground motion rates from stacked displacement measurements.
+Functions for deriving ground motion rates from stacked displacement
+measurements.
 """
 
 from __future__ import annotations
