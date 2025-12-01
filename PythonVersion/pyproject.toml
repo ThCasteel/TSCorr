@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tscorr"
+version = "0.1.0"
+description = "Time-Series image Correlation software for ground deformation detection"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "TSCorr Contributors"}
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+keywords = [
+    "remote sensing",
+    "image correlation",
+    "displacement",
+    "landslide",
+    "earthquake",
+    "geodesy",
+    "time series",
+]
+
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "xarray>=2023.1.0",
+    "dask[complete]>=2023.1.0",
+    "rioxarray>=0.14.0",
+    "rasterio>=1.3.0",
+    "pyproj>=3.4.0",
+    "pyyaml>=6.0",
+    "matplotlib>=3.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "numpydoc>=1.5.0",
+]
+
+[project.scripts]
+tscorr = "tscorr.workflow:main"
+
+[project.urls]
+Homepage = "https://github.com/tscorr/tscorr"
+Documentation = "https://tscorr.readthedocs.io"
+Repository = "https://github.com/tscorr/tscorr"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tscorr*"]
+
+[tool.setuptools.package-data]
+tscorr = ["*.yaml"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=tscorr --cov-report=term-missing"

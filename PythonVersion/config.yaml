@@ -1,0 +1,174 @@
+# TSCorr Configuration File
+# Time-Series image Correlation software
+# All parameters previously scattered across MATLAB constant.m files are consolidated here.
+
+# ============================================================================
+# PATHS
+# ============================================================================
+paths:
+  image_dir: "~/data/imagery/"           # Directory of input image files
+  code_dir: "./tscorr/"                   # Directory of source code
+  output_dir: "./outputs/"                # Base output directory
+  image_subdir: "./imagesubdir/"          # Directory of subset images
+  corr_result_dir: "./results/"           # Directory for correlation results
+  cosi_result_dir: "./cosiresults/"       # Directory for COSI-Corr results
+  pic_dir: "./pics/"                      # Directory for output figures
+  param_dir: "./para/"                    # Directory for parameter files
+  corr_file_list: "./corrfilelist.txt"    # List of displacement map results
+  sdm_list: "./sdmlist.txt"               # Input file list for SDM
+  cosi_plus_list: "./cosipluslist.txt"    # COSI-Corr Plus input list
+
+# ============================================================================
+# IMAGE CONFIGURATION
+# ============================================================================
+image:
+  # Image data types:
+  #   1: Landsat 8
+  #   2: ASTER
+  #   3: Planet
+  #   4: PGC images
+  #   5: Landsat 7 (striped)
+  #   6: Subset
+  #   8: WorldView
+  type: 1
+  resolution: 15                          # Image resolution in meters (15m Landsat, 4m Planet, 2m WorldView)
+  band_patterns:                          # File patterns by image type
+    landsat8: "L*_B8.TIF"
+    aster: "AST_L1T_*_V.tif"
+    planet: "*AnalyticMS*.tif"
+    worldview: "W*.tif"
+
+# ============================================================================
+# PROJECTION
+# ============================================================================
+projection:
+  epsg: "epsg:32637"                      # EPSG code (e.g., epsg:3413, epsg:32606)
+  description: "UTM zone 37 north"        # Human-readable description
+  # Common projections:
+  #   epsg:3413  - Polar Stereo North
+  #   epsg:3031  - Polar Stereo South
+  #   epsg:32606 - UTM zone 6 North
+
+# ============================================================================
+# PROCESSING PARAMETERS
+# ============================================================================
+processing:
+  # Correlation tool:
+  #   1: COSI-Corr
+  #   2: SETSM SDM
+  #   3: Seongsu's MIMIC2
+  #   4: COSI-Corr Plus
+  tool: 4
+  
+  # Analysis type
+  earthquake_mode: false                  # true: earthquake (no cropping); false: landslide
+  apply_subsetting: true                  # Apply image subsetting/cropping
+  coverage_threshold: 80                  # Minimum image coverage percentage (80% landslide, 2% earthquake)
+  force_warp: false                       # Force reprojection even if projections match
+  
+  # Subtile configuration
+  subtile_size_km: 10                     # Size of subtiles (10 or 25 km, divisible by 50)
+  
+  # Time series model:
+  #   1: Linear (ice melting)
+  #   2: Constant (landslides)
+  #   3: Constant + linear (volcanic)
+  algorithm: 2
+  
+  # Output resolution
+  output_resolution: 60                   # Output spatial resolution in meters
+  cosi_step_size: 60                      # COSI-Corr output pixel size (should match output_resolution)
+  
+  # Parallel processing
+  pool_size: 1                            # Number of parallel workers
+  
+  # Run steps
+  #   1: Only run steps until COSI-Corr
+  #   2: Run all steps
+  run_step: 2
+
+# ============================================================================
+# TEMPORAL FILTERING
+# ============================================================================
+temporal:
+  # Snow-free season months (1-12)
+  season_start_month: 1                   # Start month (7 for July in polar regions)
+  season_end_month: 12                    # End month (8 for August in polar regions)
+  
+  # Date range filtering
+  year_start: 0                           # Minimum year (0 = no limit)
+  year_end: 9999                          # Maximum year (9999 = no limit)
+  min_date: null                          # Minimum date (null or "YYYY/MM/DD")
+  max_date: null                          # Maximum date (null or "YYYY/MM/DD")
+  
+  # Specific dates to exclude (list of "YYYY/MM/DD")
+  exclude_dates: []
+  
+  # Earthquake event times (for earthquake_mode: true)
+  earthquake_epochs:
+    - "2023/02/05"
+    - "2023/02/06"
+  time_fix: 1                             # Time fix parameter
+
+# ============================================================================
+# VELOCITY CALCULATION
+# ============================================================================
+velocity:
+  # Velocity calculation areas:
+  #   0: Land only (exclude ice/water)
+  #   1: All areas (land, ice, water)
+  #   2: Land and ice (exclude water)
+  include_ice_water: 1
+  
+  # Point-based vs grid calculation
+  points_only: false                      # true: only calculate for specific points
+
+# ============================================================================
+# SCARP/ROI CONFIGURATION
+# ============================================================================
+scarp:
+  # Scarp processing mode:
+  #   0: No scarp file (process all grids)
+  #   1: Scarp matrix in image coordinates
+  #   2: Scarp polygon in lon/lat (shapefile)
+  mode: 0
+  shapefile: "scarp.shp"                  # Path to scarp shapefile
+
+# ============================================================================
+# PLOTTING
+# ============================================================================
+plotting:
+  enabled: false                          # Enable plot generation
+  save_output: false                      # Save additional figures and data
+  
+  # Scale parameters for vector plots
+  scale_factor: 0.025                     # Vector scale factor (5e-3 * 5)
+  scalebar_length: 20                     # Scale bar length in meters
+  scalebar_position:                      # Scale bar position [x, y] in meters
+    - 384794.01
+    - 5649894.0
+
+# ============================================================================
+# VOLCANIC EVENT (for algorithm: 3)
+# ============================================================================
+volcanic:
+  duration_flag: 1                        # Duration of volcanic event
+
+# ============================================================================
+# NUMERICAL TOLERANCES (for validation)
+# ============================================================================
+tolerances:
+  float64_absolute: 1.0e-8                # Tolerance for double precision
+  float32_absolute: 1.0e-5                # Tolerance for single precision
+  geophysical_relative: 1.0e-6            # Relative tolerance for geophysical fields
+
+# ============================================================================
+# DASK CONFIGURATION
+# ============================================================================
+dask:
+  scheduler: "threads"                    # Scheduler: "threads", "processes", "synchronous"
+  num_workers: 4                          # Number of workers
+  memory_limit: "8GB"                     # Memory limit per worker
+  chunk_size:                             # Default chunk sizes for arrays
+    x: 1024
+    y: 1024
